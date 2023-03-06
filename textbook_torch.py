@@ -99,6 +99,7 @@ class ConvNet(nn.Module):
                                                                                 item()))
     
     def test(model, device, test_dataloader):
+        # test function evaluates the model performance on the test set
         model.eval()
         loss = 0
         success = 0
@@ -107,6 +108,8 @@ class ConvNet(nn.Module):
                 X,y = X.to(device), y.to(device)
                 pred_prob = model(X)
                 loss += F.nll_loss(pred_prob, y, reduction='sum').item() # loss summed across the batch
+                # in the test function the loss is used to compute the overall test error across the entire test batch
+
                 pred = pred_prob.argmax(dim=1, keepdim = True) # us argmax to get the most likley prediction
                 success += pred.eq(y.view_as(pred)).sum().item()
         loss /= len(test_dataloader.dataset)
@@ -114,8 +117,46 @@ class ConvNet(nn.Module):
                                                                         loss, success, len(test_dataloader.dataset),
                                                                         100.* success / len(test_dataloader.dataset)))
 
+    # the mean and standard deviation values are calculated as the mean of all the pixel 
+    # values of all images in the training data set
+    train_dataloader = torch.utils.data.DataLoader(
+        datasets.MNIST('../data', train=True, transform=transforms.Compose( 
+                            [transforms.ToTensor(),transforms.Normalize((0.1302,),(0.3069,))]
+                            )), # train_X.mean()/256. and train_X. std()/256.
+
+                            batch_size = 32, shuffle=True)  
+    # batch size is 32 (a common choice)
+    # small batch means a slow training because it's calculating the gradient over and over
+    # large batches means slow training because the time to calculate the gradient is long
+    # better to make frequent and less precise gradients 
+
+    # shuffle = True : randomly shuffle training data intances to ensure a uniform distribution with a specified mean and standard deviation
+
+    # normalize the dataset to a normal distribution with a specified mean ans standard deviation
+    
+    test_dataloader = torch.utils.data.DataLoader(
+        datasets.MNIST('../data', train = False, transform=transforms.Compose(
+                            [transforms.ToTensor(), transforms.Normalize((0.1302,), (0.3069,))]
+                        )), 
+                        batch_size = 500, shuffle = False)
+    
+
+    torch.manual_seed(0) 
+        # 'set a seed' to avoid randomness and enure repeatablity 
+    device = torch.device("cpu")
+        # device is the cpu 
 
 
+
+    model = ConvNet()
+    optimizer = optim.Adadelta( model.parameters(), 1r=0.5)
+    # AdaDelta as the optimiser for this exercise with a learning rate of 0.5
+    # ^ is a good choice for sparse data, because not all pixels in the image are informative 
+    # another optimization choice is Adam 
+
+    for epoch in range(1,3):
+        train(model, device, train_dataloader, optimizer, epoch)
+        test( model, device, test_dataloader)
 
 
 
