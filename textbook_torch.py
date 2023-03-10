@@ -71,95 +71,111 @@ class ConvNet(nn.Module):
         op = F.log_softmax(x, dim=1)    
         # output (op) will have the same dimensions as the target output (the ground truth?)
         return op
-    
-
-    def train(model, device, train_dataloader, optim, epoch):
-        # function train will 
-        # 1. iterate through the dataset in batches
-        # 2. make a copy of the dataset on the given device
-        # 3. make forward pass with the retrieved data on the neural network model
-        # 4. compute the loss between the model prediction and the ground truth
-        # 5. use the given optimizer to tune model weights, 
-        # 6. print the training logs every 10 bathches
-        # one run thorugh (when entire dataset has been read once) is equal to 1 epoch 
-        model.train()
-        for b_i, (X,y) in enumerate(train_dataloader):
-            X, y = X.to(device), y.to(device) 
-            optim.zero_grad() ### optimization step? grad() has something to do with the parameters being trainable
-            pred_prob = model (X)
-            loss = F.nll_loss(pred_prob, y)
-            # nll is the negative likelihood loss
-            loss.backward()
-            optim.step()
-            if b_i % 10 == 0:
-                print('epoch: {} [{}/{}] :{:.0f}%)]/t training loss: {:.6f}'.format(
-                                                                                epoch, b_i * len(X), 
-                                                                                len(train_dataloader.dataset),
-                                                                                100.*b_i / len(train_dataloader), loss.
-                                                                                item()))
-    
-    def test(model, device, test_dataloader):
-        # test function evaluates the model performance on the test set
-        model.eval()
-        loss = 0
-        success = 0
-        with torch.no_grad():
-            for X, y in test_dataloader:
-                X,y = X.to(device), y.to(device)
-                pred_prob = model(X)
-                loss += F.nll_loss(pred_prob, y, reduction='sum').item() # loss summed across the batch
-                # in the test function the loss is used to compute the overall test error across the entire test batch
-
-                pred = pred_prob.argmax(dim=1, keepdim = True) # us argmax to get the most likley prediction
-                success += pred.eq(y.view_as(pred)).sum().item()
-        loss /= len(test_dataloader.dataset)
-        print('\nTest dataset: Overall Loss: {:.4f}, Overall Accuracy: {}/{} ({:.0f}%)\n'.format(
-                                                                        loss, success, len(test_dataloader.dataset),
-                                                                        100.* success / len(test_dataloader.dataset)))
-
-    # the mean and standard deviation values are calculated as the mean of all the pixel 
-    # values of all images in the training data set
-    train_dataloader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=True, transform=transforms.Compose( 
-                            [transforms.ToTensor(),transforms.Normalize((0.1302,),(0.3069,))]
-                            )), # train_X.mean()/256. and train_X. std()/256.
-
-                            batch_size = 32, shuffle=True)  
-    # batch size is 32 (a common choice)
-    # small batch means a slow training because it's calculating the gradient over and over
-    # large batches means slow training because the time to calculate the gradient is long
-    # better to make frequent and less precise gradients 
-
-    # shuffle = True : randomly shuffle training data intances to ensure a uniform distribution with a specified mean and standard deviation
-
-    # normalize the dataset to a normal distribution with a specified mean ans standard deviation
-    
-    test_dataloader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train = False, transform=transforms.Compose(
-                            [transforms.ToTensor(), transforms.Normalize((0.1302,), (0.3069,))]
-                        )), 
-                        batch_size = 500, shuffle = False)
-    
-
-    torch.manual_seed(0) 
-        # 'set a seed' to avoid randomness and enure repeatablity 
-    device = torch.device("cpu")
-        # device is the cpu 
 
 
 
-    model = ConvNet()
-    optimizer = optim.Adadelta( model.parameters(), 1r=0.5)
-    # AdaDelta as the optimiser for this exercise with a learning rate of 0.5
-    # ^ is a good choice for sparse data, because not all pixels in the image are informative 
-    # another optimization choice is Adam 
+def train(model, device, train_dataloader, optim, epoch):
+    # function train will 
+    # 1. iterate through the dataset in batches
+    # 2. make a copy of the dataset on the given device
+    # 3. make forward pass with the retrieved data on the neural network model
+    # 4. compute the loss between the model prediction and the ground truth
+    # 5. use the given optimizer to tune model weights, 
+    # 6. print the training logs every 10 bathches
+    # one run thorugh (when entire dataset has been read once) is equal to 1 epoch 
+    model.train()
+    for b_i, (X,y) in enumerate(train_dataloader):
+        X, y = X.to(device), y.to(device) 
+        optim.zero_grad() ### optimization step? grad() has something to do with the parameters being trainable
+        pred_prob = model(X)
+        loss = F.nll_loss(pred_prob, y)
+        # nll is the negative likelihood loss
+        loss.backward()
+        optim.step()
+        if b_i % 10 == 0:
+            print('epoch: {} [{}/{}] :{:.0f}%)]/t training loss: {:.6f}'.format(
+                                                                            epoch, b_i * len(X), 
+                                                                            len(train_dataloader.dataset),
+                                                                            100.*b_i / len(train_dataloader), loss.
+                                                                            item()))
 
-    for epoch in range(1,3):
-        train(model, device, train_dataloader, optimizer, epoch)
-        test( model, device, test_dataloader)
+def test(model, device, test_dataloader):
+    # test function evaluates the model performance on the test set
+    model.eval()
+    loss = 0
+    success = 0
+    with torch.no_grad():
+        for X, y in test_dataloader:
+            X,y = X.to(device), y.to(device)
+            pred_prob = model(X)
+            loss += F.nll_loss(pred_prob, y, reduction='sum').item() # loss summed across the batch
+            # in the test function the loss is used to compute the overall test error across the entire test batch
+
+            pred = pred_prob.argmax(dim=1, keepdim = True) # us argmax to get the most likley prediction
+            success += pred.eq(y.view_as(pred)).sum().item()
+
+    loss /= len(test_dataloader.dataset)
+
+    print('\nTest dataset: Overall Loss: {:.4f}, Overall Accuracy: {}/{} ({:.0f}%)\n'.format(
+                                                                    loss, success, len(test_dataloader.dataset),
+                                                                    100.* success / len(test_dataloader.dataset)))
+
+# the mean and standard deviation values are calculated as the mean of all the pixel 
+# values of all images in the training data set
+train_dataloader = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train=True, download=True, transform=transforms.Compose([
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.1302,),(0.3069,))])), # train_X.mean()/256. and train_X. std()/256.
+
+    batch_size = 32, shuffle=True)  
+# batch size is 32 (a common choice)
+# small batch means a slow training because it's calculating the gradient over and over
+# large batches means slow training because the time to calculate the gradient is long
+# better to make frequent and less precise gradients 
+
+# shuffle = True : randomly shuffle training data intances to ensure a uniform distribution with a specified mean and standard deviation
+
+# normalize the dataset to a normal distribution with a specified mean ans standard deviation
+
+test_dataloader = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train = False, 
+                    transform=transforms.Compose([
+                        transforms.ToTensor(), 
+                        transforms.Normalize((0.1302,), (0.3069,))
+                    ])), 
+    batch_size = 500, shuffle = False)
+
+
+torch.manual_seed(0) 
+    # 'set a seed' to avoid randomness and enure repeatablity 
+device = torch.device("cpu")
+    # device is the cpu 
 
 
 
+model = ConvNet()
+optimizer = optim.Adadelta( model.parameters(), lr=0.5)
+# Adadelta needs the decaying rate as a parameter
+
+
+# AdaDelta as the optimiser for this exercise with a learning rate of 0.5
+# ^ is a good choice for sparse data, because not all pixels in the image are informative 
+# another optimization choice is Adam 
+
+for epoch in range(1,3):
+    train(model, device, train_dataloader, optimizer, epoch)
+    test( model, device, test_dataloader)
+# should be output here
+
+#%%
+# everything above is training the model, with a reasonable test set performance, now 
+# manually chack whether the model inference on a sample image is correct
+test_samples = enumerate(test_dataloader)
+b_i, (sample_data, sample_targets) = next(test_samples)
+
+plt.imshow(sample_data[0][0], cmpa='gray', interpolation= 'none')
+
+# # should be output here
 
 
 
