@@ -26,12 +26,33 @@ print(f"Using {device} device")
 # can use triple quotation marks to create big comments
 # think about having the loops outside of the fucntion when you call it. 
 
+#%%
+#class LipDS():
+    #def __init__(self): 
+    
+df = pd.read_csv('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_processed.csv')
+
+
+# taking 80% of the lipo data and storing it in training_number
+training_number = int(0.80*(len(df)))
+
+test_data= df.iloc[training_number:]
+train_data= df.iloc[0:training_number]
+
+print(train_data)
+
+
 #%% 
 class LipoNet(nn.Module):
     def __init__(self):
-        self.fc1 = nn.Linear(1024) #(raw data set)
+        super(LipoNet, self).__init__()
+        # super is saying that class LipoNet is inheriting traits from nn.Module class
+        input_size = 1024
+        output_size = 1
+        self.fc1 = nn.Linear(input_size) #(raw data set) # nums inside nn.Linear() are wrong
+        # nn.Linear(size of dataset, )
         x = F.relu(x) # logical equivalnet of- keeps the two layers from being linearly related 
-        self.fc2 = nn.Linear()
+        self.fc2 = nn.Linear(output_size)
         x = F.relu(x) #keeps the two layers from being lineraly related
     
     def forward(self, x):
@@ -43,25 +64,14 @@ class LipoNet(nn.Module):
         # output (op) will have the same dimensions as the target output (the ground truth?)
         return op
 
-
+model = LipoNet().to(device)
+print(model)
 batch_size = 32
 
 # creating the dataset
 # 80% is training 
 # other 20% is the testing data
 
-# how do we write this using pandas%
-class LipDS():
-    def __init__(self): 
-    
-        self.df = pd.read_cvs('C:\Users\color\Documents\Bilodeau_Research_Python\lipo_fp_processed.csv')
-        
-        training_data = 0.80*(len(self.df))
-
-        testing_data = 
-
-model = LipoNet().to(device)
-print(model)
 
 
 
