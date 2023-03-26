@@ -8,36 +8,72 @@ from torchvision import datasets, transforms
 
 import matplotlib.pyplot as plt
 
-# first I need to get the training data from the csv file I think using pandas
-lipo_data = pd.read_cvs('lipo_fp_processed.csv')
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Using {device} device")
 
-training_data = lipo_data
-# training data will be the matrix excluding the very last column and the first row
-# turn into tensor maybe- use the numbers at the top to make column index maybe
+#%%
 
+###############training will be 80% of the whole thing derivative of the loss functuion feed in batches pg 31 in pytorch
+# no droup during testing 
+# update loss each batch - medium 32 - can increase for debugging
+# 1 epoc is going through all batches 
+################testing eill be the other 20%
 
 # next get the testing data from the csv file
-testing_data = lipo_data
+
 # testing data will be the final column in the matrix without the first row maybe
 
+# can use triple quotation marks to create big comments
+# think about having the loops outside of the fucntion when you call it. 
 
+#%% 
 class LipoNet(nn.Module):
     def __init__(self):
-        self.fc1 = nn.Linear()
-    # because this is a matrix data set would only fully connected layers be best to use
-    # how does the size of my data set change how I define my layers- Just one layer right
+        self.fc1 = nn.Linear(1024) #(raw data set)
+        x = F.relu(x) # logical equivalnet of- keeps the two layers from being linearly related 
+        self.fc2 = nn.Linear()
+        x = F.relu(x) #keeps the two layers from being lineraly related
+    
     def forward(self, x):
         x = self.fc1(x)
-        pass
+        x = F.relu(x)
+        x = self.fc2(x)
+        x = F.relu(x)
+        op = F.log_softmax(x, dim=1)
+        # output (op) will have the same dimensions as the target output (the ground truth?)
+        return op
 
-# should I make my dataset a class% is it necessary if all I'm doing is isolating the last column%
-# is that even what I am doing%
+
+batch_size = 32
+
+# creating the dataset
+# 80% is training 
+# other 20% is the testing data
+
+# how do we write this using pandas%
 class LipDS():
-    def __init__(self,path):
-        pass
+    def __init__(self): 
+    
+        self.df = pd.read_cvs('C:\Users\color\Documents\Bilodeau_Research_Python\lipo_fp_processed.csv')
+        
+        training_data = 0.80*(len(self.df))
+
+        testing_data = 
+
+model = LipoNet().to(device)
+print(model)
 
 
-model = LipoNet()
 
+
+#%%
 def train(model, device, optim, epoch):
-    model.train()
+    model.train() #
+    # go through each batch for loop 
+    # 
+    # 
+    # 
+    # 
+# epoch will then run the train function each iteration is  
+
+
