@@ -28,8 +28,8 @@ print(f"Using {device} device")
 
 #%%
 #class LipDS():
-    #def __init__(self): 
-    
+#def __init__(self): 
+
 df = pd.read_csv('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_processed.csv')
 
 
@@ -49,41 +49,57 @@ class LipoNet(nn.Module):
         # super is saying that class LipoNet is inheriting traits from nn.Module class
         input_size = 1024
         output_size = 1
-        self.fc1 = nn.Linear(input_size) #(raw data set) # nums inside nn.Linear() are wrong
-        # nn.Linear(size of dataset, )
-        x = F.relu(x) # logical equivalnet of- keeps the two layers from being linearly related 
-        self.fc2 = nn.Linear(output_size)
-        x = F.relu(x) #keeps the two layers from being lineraly related
+        self.fc1 = nn.Linear(input_size, output_size) #(raw data set) # nums inside nn.Linear() are wrong
+        # nn.Linear(size of dataset, size of output)
+        self.fc2 = nn.Linear(input_size, output_size)
     
     def forward(self, x):
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.fc2(x)
-        x = F.relu(x)
-        op = F.log_softmax(x, dim=1)
+        out = self.fc1(x)
+        out = F.relu(out)
+        out = self.fc2(out)
         # output (op) will have the same dimensions as the target output (the ground truth?)
-        return op
+        return out #op
 
 model = LipoNet().to(device)
 print(model)
 batch_size = 32
 
-# creating the dataset
-# 80% is training 
-# other 20% is the testing data
-
-
-
 
 
 #%%
-def train(model, device, optim, epoch):
-    model.train() #
-    # go through each batch for loop 
-    # 
-    # 
-    # 
-    # 
+#def train(model, device, optim, epoch):
+model.train() 
+
+#we need to be able to compute the gradients of loss function with respect 
+# to those variables. In order to do that, we set the requires_grad property of those tensors.
+
+x = torch.ones(1024)
+y = torch.zeros(1)
+
+# w and b parameters to optimize
+w = torch.randn(1024, 1, requires_grad=True) 
+b = torch.randn(1, requires_grad=True)
+z = torch.matmul(x,w) +b
+# compute the gradients of loss function with respect to those variables
+loss_func = torch.nn.functional.binary_cross_entropy_with_logits(z, y)
+#loss_collect = 0;
+
+print(f"Gradient function for z = {z.grad_fn}")
+print(f"Gradient function for loss = {loss_func.grad_fn}")
+
+loss_func.backward()
+print(w.grad)
+print(b.grad)
+
+
+
+# go through each batch for loop 
+# 
+# 
+# 
+# 
 # epoch will then run the train function each iteration is  
 
 
+
+# %%
