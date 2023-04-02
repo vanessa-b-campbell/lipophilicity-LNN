@@ -7,6 +7,8 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 import matplotlib.pyplot as plt
+import model as LipoNet # pretty sure this is importing my LipoNet class
+import data as LipDS 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
@@ -27,38 +29,40 @@ print(f"Using {device} device")
 # think about having the loops outside of the fucntion when you call it. 
 
 #%%
-#class LipDS():
-#def __init__(self): 
+# class LipDS():
+#     def __init__(self,path): 
 
-df = pd.read_csv('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_processed.csv')
+#         self.df = pd.read_csv(path)
 
 
-# taking 80% of the lipo data and storing it in training_number
-training_number = int(0.80*(len(df)))
+# # taking 80% of the lipo data and storing it in training_number
+#     training_number = int(0.80*(len(self.df)))
 
-test_data= df.iloc[training_number:]
-train_data= df.iloc[0:training_number]
+#     test_data= df.iloc[training_number:]
+#     train_data= df.iloc[0:training_number]
 
-print(train_data)
+#     print(train_data)
 
+
+dataset = LipDS('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_processed.csv')
 
 #%% 
-class LipoNet(nn.Module):
-    def __init__(self):
-        super(LipoNet, self).__init__()
-        # super is saying that class LipoNet is inheriting traits from nn.Module class
-        input_size = 1024
-        output_size = 1
-        self.fc1 = nn.Linear(input_size, output_size) #(raw data set) # nums inside nn.Linear() are wrong
-        # nn.Linear(size of dataset, size of output)
-        self.fc2 = nn.Linear(input_size, output_size)
+# class LipoNet(nn.Module):
+#     def __init__(self):
+#         super(LipoNet, self).__init__()
+#         # super is saying that class LipoNet is inheriting traits from nn.Module class
+#         input_size = 1024
+#         output_size = 1
+#         self.fc1 = nn.Linear(input_size, output_size) #(raw data set) # nums inside nn.Linear() are wrong
+#         # nn.Linear(size of dataset, size of output)
+#         self.fc2 = nn.Linear(input_size, output_size)
     
-    def forward(self, x):
-        out = self.fc1(x)
-        out = F.relu(out)
-        out = self.fc2(out)
-        # output (op) will have the same dimensions as the target output (the ground truth?)
-        return out #op
+#     def forward(self, x):
+#         out = self.fc1(x)
+#         out = F.relu(out)
+#         out = self.fc2(out)
+#         # output (op) will have the same dimensions as the target output (the ground truth?)
+#         return out #op
 
 model = LipoNet().to(device)
 print(model)
