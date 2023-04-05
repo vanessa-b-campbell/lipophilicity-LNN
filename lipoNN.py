@@ -7,12 +7,16 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 import matplotlib.pyplot as plt
-import model as LipoNet # pretty sure this is importing my LipoNet class
-import data as LipDS 
+from LipoNet import LipoNet # pretty sure this is importing my LipoNet class
+from LipDS import LipDS
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
+dataset = LipDS('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_processed.csv')
+print(len(dataset))
+print(dataset.input_vector[55])
+print(dataset.output_targets[55])
 #%%
 
 ###############training will be 80% of the whole thing derivative of the loss functuion feed in batches pg 31 in pytorch
@@ -44,7 +48,7 @@ print(f"Using {device} device")
 #     print(train_data)
 
 
-dataset = LipDS('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_processed.csv')
+
 
 #%% 
 # class LipoNet(nn.Module):
@@ -64,36 +68,36 @@ dataset = LipDS('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_proce
 #         # output (op) will have the same dimensions as the target output (the ground truth?)
 #         return out #op
 
-model = LipoNet().to(device)
-print(model)
-batch_size = 32
+# model = LipoNet().to(device)
+# print(model)
+# batch_size = 32
 
 
 
-#%%
-#def train(model, device, optim, epoch):
-model.train() 
+# #%%
+# #def train(model, device, optim, epoch):
+# model.train() 
 
-#we need to be able to compute the gradients of loss function with respect 
-# to those variables. In order to do that, we set the requires_grad property of those tensors.
+# #we need to be able to compute the gradients of loss function with respect 
+# # to those variables. In order to do that, we set the requires_grad property of those tensors.
 
-x = torch.ones(1024)
-y = torch.zeros(1)
+# x = torch.ones(1024)
+# y = torch.zeros(1)
 
-# w and b parameters to optimize
-w = torch.randn(1024, 1, requires_grad=True) 
-b = torch.randn(1, requires_grad=True)
-z = torch.matmul(x,w) +b
-# compute the gradients of loss function with respect to those variables
-loss_func = torch.nn.functional.binary_cross_entropy_with_logits(z, y)
-#loss_collect = 0;
+# # w and b parameters to optimize
+# w = torch.randn(1024, 1, requires_grad=True) 
+# b = torch.randn(1, requires_grad=True)
+# z = torch.matmul(x,w) +b
+# # compute the gradients of loss function with respect to those variables
+# loss_func = torch.nn.functional.binary_cross_entropy_with_logits(z, y)
+# #loss_collect = 0;
 
-print(f"Gradient function for z = {z.grad_fn}")
-print(f"Gradient function for loss = {loss_func.grad_fn}")
+# print(f"Gradient function for z = {z.grad_fn}")
+# print(f"Gradient function for loss = {loss_func.grad_fn}")
 
-loss_func.backward()
-print(w.grad)
-print(b.grad)
+# loss_func.backward()
+# print(w.grad)
+# print(b.grad)
 
 
 
