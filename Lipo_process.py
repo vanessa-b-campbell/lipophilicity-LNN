@@ -57,7 +57,7 @@ Also if dropout layers were used (not for this model) they would be used here
         
         # Make a prediction:
         # feeding the input vector data into the model
-        pred = model(input_vectors)
+        pred = model(input_vectors.float())
 
         # Calculate the loss: 
         loss = loss_fn(pred, targets.view(-1,1))
@@ -70,6 +70,8 @@ Also if dropout layers were used (not for this model) they would be used here
         # Calculate the loss and add it to our total loss
         loss_collect += loss.item()  # loss summed across the batch
 
+
+        
         # Return our normalized losses so we can analyze them later:
         loss_collect /= len(train_dataloader.dataset)
         return loss_collect
@@ -116,11 +118,12 @@ ex(# of layers, width of layers, # of epochs)
             pred = model(input_vectors)
             
             # Calculate the loss and add it to our total loss
-            loss = loss_fn(pred, targets.view(-1,1))
+            loss = loss_fn(pred, targets.view(-1,1)) # object
             
-            loss_collect += loss.item()  # loss summed across the batch
+            loss_collect += loss.item()  # converts loss to a number
+            # loss summed across the batch
             
-    loss_collect /= len(val_dataloader.dataset)
+    loss_collect /= len(val_dataloader.dataset) # normalizing 
     
     # Print out our test loss so we know how things are going
     print(
@@ -177,7 +180,7 @@ or the training dataset
     #concatinates the outputs so they are in [#datapoints x 1] rather than [batchsize x 1]        
     input_vectors_all = torch.concat(input_vectors_all)
     targets_all = torch.concat(targets_all)
-    pred_prob_all = torch.concat(pred_prob_all)
+    pred_prob_all = torch.concat(pred_prob_all).view(-1)
     
     
     return input_vectors_all, targets_all, pred_prob_all

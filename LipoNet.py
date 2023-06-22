@@ -13,18 +13,19 @@ class LipoNet(nn.Module):
         # super is saying that class LipoNet is inheriting traits from nn.Module class
         input_size = 1024 
         output_size = 1
+        hidden_layer_size = 256
 
         # two linear layers
-        self.fc1 = nn.Linear(input_size, output_size) #(raw training dataset)
+        self.fc1 = nn.Linear(input_size, hidden_layer_size) #(raw training dataset)
         # nn.Linear(size of dataset, size of output)
-        self.fc2 = nn.Linear(input_size, output_size)
+        self.fc2 = nn.Linear(hidden_layer_size, output_size)
     
     def forward(self, x):
-        out = self.fc1(x)
-        out = F.relu(out)
-        out = self.fc2(out)
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
         # output (op) will have the same dimensions as the target output (1)
-        return out #op
+        return x #op
     
 
 # testing 
