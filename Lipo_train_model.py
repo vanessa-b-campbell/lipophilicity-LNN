@@ -1,6 +1,7 @@
 # training function: for epoch in range- train the model- calculate the loss 
 #%%
 import time
+import matplotlib.pyplot as plt
 
 import torch
 import torch.optim as optim
@@ -26,7 +27,7 @@ d_val = len(lipo_dataset) - d_train
 # Define pytorch training and validation set objects:
 # also random seeded split
 train_set, val_set = torch.utils.data.random_split(
-    lipo_dataset, [d_train, d_val], generator=torch.Generator().manual_seed(42)
+    lipo_dataset, [d_train, d_val], generator=torch.Generator().manual_seed(0)
 )
 print(train_set)
 
@@ -55,7 +56,7 @@ model = LipoNet()
 model.to(device)
 
 # Set up optimizer:
-optimizer = optim.Adam(model.parameters(), lr=0.1) # learning rate ex: 1*10^-3
+optimizer = optim.Adam(model.parameters(), lr=0.001) # learning rate ex: 1*10^-3
 
 train_losses = []
 val_losses = []
@@ -63,9 +64,9 @@ val_losses = []
 start_time = time.time()
 
 #%%
-for epoch in range(1, 10):
+for epoch in range(1, 31):
     
-    train_loss = train(model, device, train_dataloader, optimizer)
+    train_loss = train(model, device, train_dataloader, optimizer, epoch)
     train_losses.append(train_loss)
 #%%
     val_loss = validation(model, device, val_dataloader, epoch)
@@ -74,3 +75,17 @@ for epoch in range(1, 10):
 end_time = time.time()
 print("Time Elapsed = {}s".format(end_time - start_time))
 # %%
+
+#fig1 = plt.figure()
+plt.plot(train_losses, label ='train losses')
+plt.legend()
+plt.xlabel('time')
+plt.ylabel('train losses')
+
+#fig2 = plt.figure()
+plt.plot(val_losses, label ='validation losses')
+plt.legend()
+plt.xlabel('time')
+plt.ylabel('validation losses')
+
+plt.show()
