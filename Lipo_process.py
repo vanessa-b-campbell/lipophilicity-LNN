@@ -1,13 +1,11 @@
 import torch 
-import numpy as np
-
 '''
 defines the 3 modes of the model
     1. train
     2. validate
     3. predict 
 
-each function takes in parameters:
+each function takes in parameters: 
         1. the model (created in LipoNet.py)
         2. the device to run everything on (cpu)
         3. dataloader (our dataset as defined in LipDS.py)
@@ -18,7 +16,7 @@ each function takes in parameters:
 
 
 
-def train(model, device, train_dataloader, optim):
+def train(model, device, train_dataloader, optim, epoch):
 # training function: for epoch in range- train the model- calculate the loss 
     '''
 defines the training mode:
@@ -57,7 +55,7 @@ Also if dropout layers were used (not for this model) they would be used here
         
         # Make a prediction:
         # feeding the input vector data into the model
-        pred = model(input_vectors.float())
+        pred = model(input_vectors)
 
         # Calculate the loss: 
         loss = loss_fn(pred, targets.view(-1,1))
@@ -70,11 +68,16 @@ Also if dropout layers were used (not for this model) they would be used here
         # Calculate the loss and add it to our total loss
         loss_collect += loss.item()  # loss summed across the batch
 
-
-        
         # Return our normalized losses so we can analyze them later:
-        loss_collect /= len(train_dataloader.dataset)
-        return loss_collect
+    loss_collect /= len(train_dataloader.dataset)      
+        
+    print(
+    "\nEpoch:{}   training dataset: Loss per Datapoint: {:.4f}".format(
+        epoch, loss_collect
+    )
+    )
+
+    return loss_collect
 
 
 
@@ -130,8 +133,7 @@ ex(# of layers, width of layers, # of epochs)
         "\nEpoch:{}   Validation dataset: Loss per Datapoint: {:.4f}".format(
             epoch, loss_collect
         )
-    )       
-
+    )
     # Return our normalized losses so we can analyze them later:
     return loss_collect
 
