@@ -10,13 +10,16 @@ from torch.utils.data import DataLoader
 #%%
 from Lip_data import LipDS
 from LipoNet import LipoNet
-from Lipo_process import train, validation
+from Lipo_process import train, validation, predict
+
+from sklearn.metrics import r2_score
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+
 
 ## SET UP DATALOADERS: ---
 
 #%%
-
-
 lipo_dataset = LipDS('C:/Users/color/Documents/Bilodeau_Research_Python/lipo_fp_processed.csv')
 print(lipo_dataset)
 print(lipo_dataset.input_vector[55])
@@ -32,12 +35,11 @@ train_set, val_set = torch.utils.data.random_split(
 print(train_set)
 
 
-
-
 #%%
 # Build pytorch training and validation set dataloaders:
 train_dataloader = DataLoader(train_set, batch_size = 32, shuffle=True)
 val_dataloader = DataLoader(val_set, batch_size = 32, shuffle=True)
+
 
 
 
@@ -51,9 +53,10 @@ torch.manual_seed(0)
 # Assign training to a device (often cpu when we are just starting out)
 device = torch.device("cpu")
 
-
-model = LipoNet()
+#################################################################################### hyperparameters
+model = LipoNet(256)
 model.to(device)
+epoch = 30
 
 # Set up optimizer:
 optimizer = optim.Adam(model.parameters(), lr=0.001) # learning rate ex: 1*10^-3
@@ -63,19 +66,22 @@ val_losses = []
 
 start_time = time.time()
 
-#%%
-for epoch in range(1, 31):
+
+
+for e in range(1,epoch+1):
     
-    train_loss = train(model, device, train_dataloader, optimizer, epoch)
+    train_loss = train(model, device, train_dataloader, optimizer, e)
     train_losses.append(train_loss)
-#%%
-    val_loss = validation(model, device, val_dataloader, epoch)
+    
+    val_loss = validation(model, device, val_dataloader, e)
     val_losses.append(val_loss)
 
 end_time = time.time()
 print("Time Elapsed = {}s".format(end_time - start_time))
 # %%
 
+
+# plotting loss vs epochs for validation and training
 #fig1 = plt.figure()
 plt.plot(train_losses, label ='train losses')
 plt.legend()
@@ -86,6 +92,33 @@ plt.ylabel('train losses')
 plt.plot(val_losses, label ='validation losses')
 plt.legend()
 plt.xlabel('time')
-plt.ylabel('validation losses')
+plt.ylabel('losses')
 
 plt.show()
+
+
+#%% Model Statistics
+
+input_all, target_all, pred_prob_all = predict(model, device, val_dataloader)
+
+r2_function = r2_score(target_all, pred_prob_all)
+mae = mean_absolute_error(target_all, pred_prob_all)
+rmse = mean_squared_error(target_all, pred_prob_all, squared=False)
+
+# only a few digits are relevant
+print("R2 Score: {:.4f}".format(r2_function))
+print("MAE: {:.4f}".format(mae))
+print("RMSE: {:.4f}".format(rmse))
+
+
+
+plt.figure(figsize=(4, 4), dpi=100)
+plt.scatter(target_all, pred_prob_all, alpha=0.3)
+plt.plot([min(target_all), max(target_all)], [min(target_all),
+    max(target_all)], color="k", ls="--")
+plt.xlim([min(target_all), max(target_all)])
+plt.xlabel("True Values")
+plt.ylabel("Predicted Values")
+
+plt.show()
+# %%
