@@ -151,7 +151,7 @@ defines the prediction mode:
         concatinates the outputs so they are in [#datapoints x 1] rather than [batchsize x 1]
 
 
-the validation function creates the output we compare to everything. It can take in either the validation dataset
+the predict function creates the output we compare to everything. It can take in either the validation dataset
 or the training dataset
 '''
     
