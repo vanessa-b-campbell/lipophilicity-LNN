@@ -29,20 +29,15 @@ defines the training mode:
 the train function purpose is to update the weights (back propigation line)
 Also if dropout layers were used (not for this model) they would be used here
 '''
-
     
     # Set the model to training mode:
     model.train()
 
-    
     # Define loss function:
-    
     loss_fn = torch.nn.L1Loss()
-    
     # Create a loss variable to keep track of total losses in the test set
     loss_collect = 0
 
-    
     for b_i, (input_vectors, targets) in enumerate(train_dataloader):
     # X is assigned to the input vector portion of the dataset
     # y is assigned to the output target of the dataset? 
@@ -52,31 +47,32 @@ Also if dropout layers were used (not for this model) they would be used here
         
         # Zero out the optimizer:
         optim.zero_grad()
-        
         # Make a prediction:
         # feeding the input vector data into the model
         pred = model(input_vectors)
 
         # Calculate the loss: 
         loss = loss_fn(pred, targets.view(-1,1))
-
         
         # Backpropagation: (this updates the weights)
         loss.backward()
         optim.step()
-        
         # Calculate the loss and add it to our total loss
         loss_collect += loss.item()  # loss summed across the batch
 
         # Return our normalized losses so we can analyze them later:
-    loss_collect /= len(train_dataloader.dataset)      
-        
-    print(
-    "\nEpoch:{}   training dataset: Loss per Datapoint: {:.4f}".format(
-        epoch, loss_collect
-    )
-    )
 
+        if b_i % 10 == 0:
+            print('epoch: {} [{}/{} ({:.0f}%)]\t training loss: {:.1f}'.format(
+                epoch, b_i * len(input_vectors), len(train_dataloader.dataset),
+                100 * b_i * len(input_vectors) / len(train_dataloader.dataset),
+                loss.item()))
+        # print(
+        # "\nEpoch:{}   training dataset: Loss per Datapoint: {:.4f}".format(
+        #     epoch, loss_collect
+        # )
+        # )
+    loss_collect /= len(train_dataloader.dataset)
     return loss_collect
 
 
@@ -128,12 +124,15 @@ ex(# of layers, width of layers, # of epochs)
             
     loss_collect /= len(val_dataloader.dataset) # normalizing 
     
+
+    print('\nTest dataset: Overall Loss: {:.1f},  ({:.2f}%)\n'.format(
+        len(val_dataloader.dataset)*loss_collect,loss_collect))
     # Print out our test loss so we know how things are going
-    print(
-        "\nEpoch:{}   Validation dataset: Loss per Datapoint: {:.4f}".format(
-            epoch, loss_collect
-        )
-    )
+    # print(
+    #     "\nEpoch:{}   Validation dataset: Loss per Datapoint: {:.4f}".format(
+    #         epoch, loss_collect
+    #     )
+    # )
     # Return our normalized losses so we can analyze them later:
     return loss_collect
 
